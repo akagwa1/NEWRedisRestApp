@@ -23,7 +23,7 @@ namespace RestClientIndexer
             if (client.IndexExists("contacts").Exists)
             {
 
-                UpsertContact(client, new Contacts("Andrew Kagwa", "Uganda"), "contacts", "contacts", 2);
+                UpsertContact(client, new Contacts(1,"Andrew Kagwa", "Uganda"));
                 Console.WriteLine("Indexing Successfull");
             }
             else
@@ -34,26 +34,46 @@ namespace RestClientIndexer
 
 
             Console.ReadKey();
-        
-        
+
+            QueryContainer query = new TermQuery
+            {
+                Field = "Name",
+                Value = "Andrew",
+                 
+                
+            };
+
+            var searchReq = new SearchRequest
+            {
+
+                From = 0,
+                Size = 10,
+                Query = query,
+            };
+
+            var result = client.Search<Contacts>(searchReq);
+
+
+
         }
 
        
 
         public class Contacts
         {
+            public int id { get; set; }
             public string name { get; set; }
             public string country { get; set; }
-            public Contacts(string Name, string Country)
+            public Contacts(int Id, string Name, string Country)
             {
-                name = Name; country = Country;
+                id = Id; name = Name; country = Country;
             }
         }
 
      
-        public static void UpsertContact(ElasticClient client, Contacts contact, string index, string type, int id)
+        public static void UpsertContact(ElasticClient client, Contacts contact)
         {
-            var RecordInserted = client.Index(contact, index, type, id).Id;
+            var RecordInserted = client.Index(contact);
             
 
             if (RecordInserted.ToString() != "")
